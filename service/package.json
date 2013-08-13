@@ -1,0 +1,17 @@
+{
+  "name": "bridges-service",
+  "description": "A REST service for Bridges data using MongoDB",
+  "version": "0.0.1",
+  "author": {
+    "name": "Joe Turgeon",
+    "email": "arithmetric@gmail.com"
+  },
+  "main": "app",
+  "dependencies": {
+    "mongodb": "*",
+    "restify": "*"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  }
+}
