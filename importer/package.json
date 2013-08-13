@@ -1,0 +1,16 @@
+{
+  "name": "bridges-importer",
+  "description": "An importer for Bridges data to MongoDB",
+  "version": "0.0.1",
+  "author": {
+    "name": "Joe Turgeon",
+    "email": "arithmetric@gmail.com"
+  },
+  "main": "app",
+  "dependencies": {
+    "mongodb": "*"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  }
+}
