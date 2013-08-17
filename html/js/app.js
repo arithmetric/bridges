@@ -46,6 +46,7 @@ function updatePosition() {
 function changeRange(range) {
   bridgesCurrentLongitude = 0;
   bridgesCurrentLatitude = 0;
+  bridgesCurrentRange = range;
   updatePosition();
 }
 
