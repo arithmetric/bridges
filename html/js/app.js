@@ -72,8 +72,10 @@ function locationError(err) {
 }
 
 function enableTracking() {
-  bridgesCurrentRange = 400;
   if (!bridgesWatchId) {
+    bridgesCurrentLongitude = 0;
+    bridgesCurrentLatitude = 0;
+    bridgesCurrentRange = 400;
     bridgesWatchId = navigator.geolocation.watchPosition(locationSuccess, locationError, {enableHighAccuracy: true, timeout: bridgesLocationTimeout});
   }
 }
