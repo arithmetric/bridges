@@ -71,7 +71,7 @@ function locationError(err) {
 }
 
 function enableTracking() {
-  bridgesCurrentRange = 160;
+  bridgesCurrentRange = 400;
   if (!bridgesWatchId) {
     bridgesWatchId = navigator.geolocation.watchPosition(locationSuccess, locationError, {enableHighAccuracy: true, timeout: bridgesLocationTimeout});
   }
@@ -88,8 +88,8 @@ function handleModeChange(e) {
   disableTracking();
   var modeId = $(e.target).attr('id');
   switch(modeId) {
-    case 'action-tenth':
-      changeRange(160);
+    case 'action-quarter':
+      changeRange(400);
       break;
     case 'action-one':
       changeRange(1600);
