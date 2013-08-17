@@ -1,22 +1,26 @@
 
 (function($) {
 
-var bridgesTrackTimer = 0,
+const bridgesLocationAccuracyFactor = 1500,
+  bridgesLocationTimeout = 2000,
+  bridgesDebug = 1;
+
+var bridgesWatchId = 0,
   bridgesCurrentLatitude = 0,
   bridgesCurrentLongitude = 0,
   bridgesCurrentRange = 0;
 
-function updateResults(range, fn) {
-  var serviceUrl;
-  bridgesCurrentRange = range;
-  serviceUrl = 'http://' + window.location.hostname + ':8841/bridges?longitude=' + bridgesCurrentLongitude + '&latitude=' + bridgesCurrentLatitude + '&range=' + bridgesCurrentRange;
+function updateResults() {
+  var serviceUrl = 'http://' + window.location.hostname + ':8841/bridges?longitude=' + bridgesCurrentLongitude + '&latitude=' + bridgesCurrentLatitude + '&range=' + bridgesCurrentRange;
   $.ajax({
     dataType: "json",
     url: serviceUrl,
     success: function (data) {
-//      alert('got data: ' + JSON.stringify(data));
       if (data.hasOwnProperty("status") && data.hasOwnProperty("results") && data.status == "ok") {
         $("#results").children().remove();
+        if (bridgesDebug) {
+          $("#results").append("<p>Using location " + bridgesCurrentLongitude + ", " + bridgesCurrentLatitude + " in range " + bridgesCurrentRange + "</p>");
+        }
         if (data.results.length) {
           $("#results").append("<ul></ul>");
           num = data.results.length;
@@ -31,62 +35,51 @@ function updateResults(range, fn) {
       else {
         $("#results").append("<p>Something went wrong.</p>");
       }
-      if (fn) {
-        fn();
-      }
     }
   });
 }
 
-function updatePosition(fn) {
-  navigator.geolocation.getCurrentPosition(function (point) {
-    var latitude = point.coords.latitude,
-      longitude = point.coords.longitude,
-      changed = (Math.round(latitude * 1000) != Math.round(bridgesCurrentLatitude * 1000) && Math.round(longitude * 1000) != Math.round(bridgesCurrentLongitude * 1000)) ? 1 : 0;
+function updatePosition() {
+  navigator.geolocation.getCurrentPosition(locationSuccess, locationError, {enableHighAccuracy: true, timeout: bridgesLocationTimeout});
+}
+
+function changeRange(range) {
+  bridgesCurrentLongitude = 0;
+  bridgesCurrentLatitude = 0;
+  updatePosition();
+}
+
+function locationSuccess(point) {
+  var latitude = point.coords.latitude,
+    longitude = point.coords.longitude,
+    changed = (Math.round(latitude * bridgesLocationAccuracyFactor) != Math.round(bridgesCurrentLatitude * bridgesLocationAccuracyFactor) && Math.round(longitude * bridgesLocationAccuracyFactor) != Math.round(bridgesCurrentLongitude * bridgesLocationAccuracyFactor)) ? 1 : 0;
+  if (bridgesDebug) {
+    $("#results").prepend("<p>Location checked... " + (changed ? "changed" : "unchanged") + "</p>");
+  }
+  if (changed) {
     bridgesCurrentLatitude = latitude;
     bridgesCurrentLongitude = longitude;
-    if (fn) {
-      fn(changed);
-    }
-  }, function (err) {
-    if (err.code == 1) {
-      alert('perm denied');
-      // user said no!
-    }
-    if (fn) {
-      fn(0);
-    }
-  });
+    updateResults();
+  }
 }
 
-function updateBridges(range, fn) {
-  updatePosition(function (changed) {
-    if (changed || (range != bridgesCurrentRange)) {
-      updateResults(range, function () {
-        if (fn) {
-          fn();
-        }
-      });
-    }
-    else {
-      if (fn) {
-        fn();
-      }
-    }
-  });
+function locationError(err) {
+  if (err.code == 1) {
+    alert('perm denied');
+    // user said no!
+  }
 }
 
 function enableTracking() {
-  disableTracking();
-  updateBridges(160, function () {
-    bridgesTrackTimer = setTimeout(enableTracking, 5000);
-  });
+  if (!bridgesWatchId) {
+    bridgesWatchId = navigator.geolocation.watchPosition(locationSuccess, locationError, {enableHighAccuracy: true, timeout: bridgesLocationTimeout});
+  }
 }
 
 function disableTracking() {
-  if (bridgesTrackTimer) {
-    clearTimeout(bridgesTrackTimer);
-    bridgesTrackTimer = 0;
+  if (bridgesWatchId) {
+    navigator.geolocation.clearWatch(bridgesWatchId);
+    bridgesWatchId = 0;
   }
 }
 
@@ -95,13 +88,13 @@ function handleModeChange(e) {
   var modeId = $(e.target).attr('id');
   switch(modeId) {
     case 'action-tenth':
-      updateBridges(160);
+      changeRange(160);
       break;
     case 'action-one':
-      updateBridges(1600);
+      changeRange(1600);
       break;
     case 'action-three':
-      updateBridges(4800);
+      changeRange(4800);
       break;
     case 'action-track':
       enableTracking();
