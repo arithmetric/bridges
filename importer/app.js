@@ -37,6 +37,14 @@ function handleData(data) {
     itemLatInt = parseInt(item[19], 10);
     itemLon = -1 * parseFloat(Number(String(itemLonInt).substring(0, 2)) + Number((String(itemLonInt).substring(2, 4) / 60)) + Number((String(itemLonInt).substring(4, 8) / 366000)));
     itemLat = parseFloat(Number(String(itemLatInt).substring(0, 2)) + Number((String(itemLatInt).substring(2, 4) / 60)) + Number((String(itemLatInt).substring(4, 8) / 366000)));
+    if (isNaN(itemLon)) {
+      console.log("Invalid longitude value for bridge " + item[1]);
+      continue;
+    }
+    if (isNaN(itemLat)) {
+      console.log("Invalid latitude value for bridge " + item[1]);
+      continue;
+    }
     record.point = {
       "type": "Point",
       "coordinates": [itemLon, itemLat]
