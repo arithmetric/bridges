@@ -24,20 +24,31 @@ server.get('/bridges', function (req, res, next) {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  if (req.params.hasOwnProperty('longitude') && req.params.hasOwnProperty('latitude') && req.params.hasOwnProperty('range')) {
-    query = {
+  if (req.params.hasOwnProperty('lon') && req.params.hasOwnProperty('lat') && req.params.hasOwnProperty('range')) {
+    var criteria = {
       "point": {
         "$near": {
           "$geometry": {
             "type": "Point",
-            "coordinates": [parseFloat(req.params.longitude), parseFloat(req.params.latitude)]
+            "coordinates": [parseFloat(req.params.lon), parseFloat(req.params.lat)]
           },
           "$maxDistance": parseInt(req.params.range)
         }
       }
+    },
+    projection = {
+      "crossing": true,
+      "road": true,
+      "point": true
     };
-    mongoCollection.find(query).toArray(function(err, results) {
-      res.send({"status": "ok", "results": results});
+    mongoCollection.find(criteria, projection).toArray(function(err, results) {
+      console.log("criteria:", criteria.point["$near"]["$geometry"], "err: ", err, "results:", results);
+      if (err || !results) {
+        res.send({"status": "error", "message": "find failed"});
+      }
+      else {
+        res.send({"status": "ok", "results": results});
+      }
       return next();
     });
   }
