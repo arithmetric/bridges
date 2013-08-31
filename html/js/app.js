@@ -24,7 +24,8 @@ function mapCloseInfo() {
 function mapShowInfo(e) {
   mapCloseInfo();
   bridgesInfoWindow = new google.maps.InfoWindow({
-    content: "<label>Road:</label> <strong>" + this.bridgeData.road + "</strong><br/><label>Crossing:</label> <strong>" + this.bridgeData.crossing + "</strong>"
+    content: "<label>Road:</label> <strong>" + this.bridgeData.road + "</strong><br/><label>Crossing:</label> <strong>" + this.bridgeData.crossing + "</strong>",
+    disableAutoPan: true
   });
   bridgesInfoWindow.open(bridgesMap, this);
 }
@@ -151,6 +152,26 @@ function handleNavbarAction(e) {
       $('#action-three').parent().addClass('active');
       changeRange(4800);
       break;
+    case 'action-zoom-in':
+      $('.action-range').parent().removeClass('active');
+      $('#action-zoom-in').parent().addClass('active');
+      if (bridgesCurrentRange == 1600) {
+        changeRange(400);
+      }
+      else if (bridgesCurrentRange == 4800) {
+        changeRange(1600);
+      }
+      break;
+    case 'action-zoom-out':
+      $('.action-range').parent().removeClass('active');
+      $('#action-zoom-out').parent().addClass('active');
+      if (bridgesCurrentRange == 400) {
+        changeRange(1600);
+      }
+      else if (bridgesCurrentRange == 1600) {
+        changeRange(4800);
+      }
+      break;
     case 'action-track':
       $('.action-range').parent().removeClass('active');
       $('#action-track').parent().addClass('active');
@@ -200,6 +221,7 @@ function buildMap(lat, lon) {
     mapOptions = {
       center: pos,
       disableDefaultUI: true,
+      disableDoubleClickZoom: true,
       draggable: false,
       keyboardShortcuts: false,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -217,6 +239,8 @@ function buildMap(lat, lon) {
 
 function initialize() {
   $('.navbar a').click(handleNavbarAction);
+  changeRange(400);
+  $('#action-quarter').parent().addClass('active');
 }
 
 initialize();

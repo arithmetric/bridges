@@ -2,10 +2,20 @@
 .navbar {
   top: 0;
   z-index: 100;
+  position: fixed !important;
 }
 
 .navbar-inner {
-  padding: 0 10px !important;
+  max-height: 40px;
+  white-space: nowrap;
+  padding: 0 10px;
+}
+
+@media (max-width: 480px) {
+  .navbar .nav>li>a {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
 }
 
 #map-container {

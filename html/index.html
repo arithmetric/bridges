@@ -2,8 +2,9 @@
 <html>
   <head>
     <title>U.S. Bridges by @arithmetric</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
     <link href="css/app.css" rel="stylesheet" media="screen">
   </head>
   <body>
@@ -11,13 +12,15 @@
       <div class="navbar-inner">
         <a href="#" class="brand" id="action-about">U.S. Bridges</a>
         <ul class="nav">
-          <li><a href="#" class="action-range" id="action-quarter">1/4 mile</a></li>
-          <li><a href="#" class="action-range" id="action-one">1 mile</a></li>
-          <li><a href="#" class="action-range" id="action-three">3 miles</a></li>
-          <li><a href="#" class="action-range" id="action-track">Follow</a></li>
+          <li><a href="#" class="action-range hidden-phone" id="action-quarter">1/4 mile</a></li>
+          <li><a href="#" class="action-range hidden-phone" id="action-one">1 mile</a></li>
+          <li><a href="#" class="action-range hidden-phone" id="action-three">3 miles</a></li>
+          <li><a href="#" class="action-range visible-phone" id="action-zoom-in"><i class="icon-zoom-in"></i></a></li>
+          <li><a href="#" class="action-range visible-phone" id="action-zoom-out"><i class="icon-zoom-out"></i></a></li>
+          <li><a href="#" class="action-range" id="action-track"><i class="icon-repeat"></i> <span class="hidden-phone">Follow</span></a></li>
           <li class="divider-vertical"></li>
-          <li class="active"><a href="#" id="action-map"><i class="icon-globe"></i> Map</a></li>
-          <li><a href="#" id="action-table"><i class="icon-list"></i> Table</a></li>
+          <li class="active"><a href="#" id="action-map"><i class="icon-globe"></i> <span class="hidden-phone">Map</span></a></li>
+          <li><a href="#" id="action-table"><i class="icon-list"></i> <span class="hidden-phone">Table</span></a></li>
         </ul>
       </div>
     </div>
