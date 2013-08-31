@@ -7,24 +7,25 @@
     <link href="css/app.css" rel="stylesheet" media="screen">
   </head>
   <body>
-    <h1>Bridges</h1>
-    
-    
-    <div id="actions">
-      <div class="btn-group" data-toggle="buttons-radio">
-        <label>Select mode</label>
-        <button type="button" class="btn btn-primary" id="action-quarter">1/4 mile</button>
-        <button type="button" class="btn btn-primary" id="action-one">1 mile</button>
-        <button type="button" class="btn btn-primary" id="action-three">3 miles</button>
-        <button type="button" class="btn btn-primary" id="action-track">Track</button>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <a href="#" class="brand" id="action-about">U.S. Bridges</a>
+        <ul class="nav">
+          <li><a href="#" class="action-range" id="action-quarter">1/4 mile</a></li>
+          <li><a href="#" class="action-range" id="action-one">1 mile</a></li>
+          <li><a href="#" class="action-range" id="action-three">3 miles</a></li>
+          <li><a href="#" class="action-range" id="action-track">Follow</a></li>
+          <li class="divider-vertical"></li>
+          <li class="active"><a href="#" id="action-map"><i class="icon-globe"></i> Map</a></li>
+          <li><a href="#" id="action-table"><i class="icon-list"></i> Table</a></li>
+        </ul>
       </div>
     </div>
 
-    <div id="results">
-      <p>Select mode to find bridges.</p>
+    <div id="map-container">
     </div>
 
-    <div id="map-container">
+    <div id="table-container">
     </div>
 
     <script src="http://code.jquery.com/jquery.js"></script>

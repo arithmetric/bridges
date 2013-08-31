@@ -3,7 +3,7 @@
 
 const bridgesLocationAccuracyFactor = 1000,
   bridgesLocationTimeout = 1000,
-  bridgesDebug = 1;
+  bridgesDebug = 0;
 
 var bridgesWatchId = 0,
   bridgesCurrentLatitude = 0,
@@ -24,7 +24,7 @@ function mapCloseInfo() {
 function mapShowInfo(e) {
   mapCloseInfo();
   bridgesInfoWindow = new google.maps.InfoWindow({
-    content: this.bridgeData.road + ' / ' + this.bridgeData.crossing
+    content: "<label>Road:</label> <strong>" + this.bridgeData.road + "</strong><br/><label>Crossing:</label> <strong>" + this.bridgeData.crossing + "</strong>"
   });
   bridgesInfoWindow.open(bridgesMap, this);
 }
@@ -58,25 +58,25 @@ function updateResults() {
     url: serviceUrl,
     success: function (data) {
       if (data.hasOwnProperty("status") && data.hasOwnProperty("results") && data.status == "ok") {
-        $("#results").children().remove();
+        $("#table-container").children().remove();
         mapRemoveMarkers();
         if (bridgesDebug) {
-          $("#results").append("<p>Using location " + bridgesCurrentLongitude + ", " + bridgesCurrentLatitude + " in range " + bridgesCurrentRange + "</p>");
+          $("#table-container").append("<p>Using location " + bridgesCurrentLongitude + ", " + bridgesCurrentLatitude + " in range " + bridgesCurrentRange + "</p>");
         }
         if (data.results.length) {
-          $("#results").append("<ul></ul>");
+          $("#table-container").append('<table class="table table-striped"><thead><th>Road</th><th>Crossing</th><th></th></thead><tbody></tbody></table>');
           num = data.results.length;
           for (i = 0; i < num; i++) {
-            $("#results ul").append("<li>" + data.results[i].road + " / " + data.results[i].crossing + "</li>");// " (" + data.results[i].location + ")</li>");
+            $("#table-container tbody").append("<tr><td>" + data.results[i].road + "</td><td>" + data.results[i].crossing + "</td><td></td></tr>");
             mapAddMarker(data.results[i]);
           }
         }
         else {
-          $("#results").append("<p>No bridges found.</p>");
+          $("#table-container").append("<p>No bridges found.</p>");
         }
       }
       else {
-        $("#results").append("<p>Something went wrong.</p>");
+        $("#table-container").append("<p>Something went wrong.</p>");
       }
     }
   });
@@ -87,6 +87,7 @@ function updatePosition() {
 }
 
 function changeRange(range) {
+  disableTracking();
   bridgesCurrentLongitude = 0;
   bridgesCurrentLatitude = 0;
   bridgesCurrentRange = range;
@@ -116,12 +117,11 @@ function locationError(err) {
 }
 
 function enableTracking() {
-  if (!bridgesWatchId) {
-    bridgesCurrentLongitude = 0;
-    bridgesCurrentLatitude = 0;
-    bridgesCurrentRange = 400;
-    bridgesWatchId = navigator.geolocation.watchPosition(locationSuccess, locationError, {enableHighAccuracy: true, timeout: bridgesLocationTimeout});
-  }
+  disableTracking();
+  bridgesCurrentLongitude = 0;
+  bridgesCurrentLatitude = 0;
+  bridgesCurrentRange = 400;
+  bridgesWatchId = navigator.geolocation.watchPosition(locationSuccess, locationError, {enableHighAccuracy: true, timeout: bridgesLocationTimeout});
 }
 
 function disableTracking() {
@@ -131,23 +131,45 @@ function disableTracking() {
   }
 }
 
-function handleModeChange(e) {
-  disableTracking();
-  var modeId = $(e.target).attr('id');
-  switch(modeId) {
+function handleNavbarAction(e) {
+  var actionId = $(e.target).attr('id');
+  switch(actionId) {
+    case 'action-about':
+      break;
     case 'action-quarter':
+      $('.action-range').parent().removeClass('active');
+      $('#action-quarter').parent().addClass('active');
       changeRange(400);
       break;
     case 'action-one':
+      $('.action-range').parent().removeClass('active');
+      $('#action-one').parent().addClass('active');
       changeRange(1600);
       break;
     case 'action-three':
+      $('.action-range').parent().removeClass('active');
+      $('#action-three').parent().addClass('active');
       changeRange(4800);
       break;
     case 'action-track':
+      $('.action-range').parent().removeClass('active');
+      $('#action-track').parent().addClass('active');
       enableTracking();
       break;
+    case 'action-map':
+      $('#map-container').show();
+      $('#action-map').parent().addClass('active');
+      $('#table-container').hide();
+      $('#action-table').parent().removeClass('active');
+      break;
+    case 'action-table':
+      $('#table-container').show();
+      $('#action-table').parent().addClass('active');
+      $('#map-container').hide();
+      $('#action-map').parent().removeClass('active');
+      break;
   }
+  e.preventDefault();
 }
 
 function getMapZoom() {
@@ -177,9 +199,12 @@ function buildMap(lat, lon) {
   var pos = new google.maps.LatLng(lat, lon),
     mapOptions = {
       center: pos,
+      disableDefaultUI: true,
       draggable: false,
-      zoom: getMapZoom(),
-      mapTypeId: google.maps.MapTypeId.HYBRID
+      keyboardShortcuts: false,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      scrollwheel: false,
+      zoom: getMapZoom()
     },
     mapDiv = document.getElementById("map-container");
   bridgesMap = new google.maps.Map(mapDiv, mapOptions);
@@ -191,7 +216,7 @@ function buildMap(lat, lon) {
 }
 
 function initialize() {
-  $('#actions button').click(handleModeChange);
+  $('.navbar a').click(handleNavbarAction);
 }
 
 initialize();
