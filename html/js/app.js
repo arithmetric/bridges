@@ -1,18 +1,28 @@
 
 (function($) {
 
-const bridgesLocationAccuracyFactor = 1000,
+const bridgesLocationAccuracyFactor = 100,
   bridgesLocationTimeout = 1000,
   bridgesDebug = 0;
 
 var bridgesWatchId = 0,
   bridgesCurrentLatitude = 0,
   bridgesCurrentLongitude = 0,
+  bridgesLastDataLatitude = 0,
+  bridgesLastDataLongitude = 0,
   bridgesCurrentRange = 0,
   bridgesMap = 0,
   bridgesMapMarkers = [],
   bridgesSelfMarker = 0,
+  bridgesRangeCircle = 0,
   bridgesInfoWindow = 0;
+
+function showWarning(msg) {
+  var msgHash = String(msg).hashCode();
+  if (!$("header.navbar .warning-" + msgHash).length) {
+    $("header.navbar").append('<div class="alert warning-' + msgHash + '"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> ' + msg + '</div>');
+  }
+}
 
 function mapCloseInfo() {
   if (bridgesInfoWindow) {
@@ -75,6 +85,9 @@ function updateResults() {
         else {
           $("#table-container").append("<p>No bridges found.</p>");
         }
+        centerMap();
+        bridgesLastDataLatitude = bridgesCurrentLatitude;
+        bridgesLastDataLongitude = bridgesCurrentLongitude;
       }
       else {
         $("#table-container").append("<p>Something went wrong.</p>");
@@ -96,24 +109,23 @@ function changeRange(range) {
 }
 
 function locationSuccess(point) {
-  var latitude = point.coords.latitude,
-    longitude = point.coords.longitude,
-    changed = (Math.round(latitude * bridgesLocationAccuracyFactor) != Math.round(bridgesCurrentLatitude * bridgesLocationAccuracyFactor) && Math.round(longitude * bridgesLocationAccuracyFactor) != Math.round(bridgesCurrentLongitude * bridgesLocationAccuracyFactor)) ? 1 : 0;
-  centerMap(latitude, longitude);
+  var currentLatLng = new google.maps.LatLng(bridgesCurrentLatitude, bridgesCurrentLongitude),
+    newLatLng = new google.maps.LatLng(point.coords.latitude, point.coords.longitude),
+    changed = (currentLatLng && newLatLng) ? google.maps.geometry.spherical.computeDistanceBetween(currentLatLng, newLatLng) > bridgesLocationAccuracyFactor : true;
+  bridgesCurrentLatitude = point.coords.latitude;
+  bridgesCurrentLongitude = point.coords.longitude;
+  centerMap();
   if (bridgesDebug) {
     $("#results").prepend("<p>Location checked... " + (changed ? "changed" : "unchanged") + "</p>");
   }
   if (changed) {
-    bridgesCurrentLatitude = latitude;
-    bridgesCurrentLongitude = longitude;
     updateResults();
   }
 }
 
 function locationError(err) {
   if (err.code == 1) {
-    alert('perm denied');
-    // user said no!
+    showWarning("You must provide your location to find nearby bridges.");
   }
 }
 
@@ -204,20 +216,84 @@ function getMapZoom() {
   return mapZoom;
 }
 
-function centerMap(lat, lon) {
+function centerMap() {
   if (bridgesMap) {
-    var pos = new google.maps.LatLng(lat, lon);
-    bridgesMap.panTo(pos);
-    bridgesMap.setZoom(getMapZoom());
+    var pos = new google.maps.LatLng(bridgesCurrentLatitude, bridgesCurrentLongitude);
     bridgesSelfMarker.setPosition(pos);
+    bridgesRangeCircle.setCenter(pos);
+    bridgesRangeCircle.setRadius(bridgesCurrentRange);
+    bridgesMap.panTo(pos);
+    bridgesMap.fitBounds(bridgesRangeCircle.getBounds());
   }
   else {
-    buildMap(lat, lon);
+    buildMap();
   }
 }
 
-function buildMap(lat, lon) {
-  var pos = new google.maps.LatLng(lat, lon),
+function buildMap() {
+  var pos = new google.maps.LatLng(bridgesCurrentLatitude, bridgesCurrentLongitude),
+    mapStyles = [
+      {
+        "featureType": "poi.business",
+        "elementType": "geometry",
+        "stylers": [
+          { "visibility": "on" }
+        ]
+      },{
+        "featureType": "poi.place_of_worship",
+        "elementType": "geometry",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      },{
+        "featureType": "poi.school",
+        "elementType": "geometry",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      },{
+        "featureType": "poi.sports_complex",
+        "elementType": "geometry",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      },{
+        "featureType": "poi.government",
+        "elementType": "geometry",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      },{
+        "featureType": "administrative",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      },{
+        "featureType": "poi",
+        "elementType": "labels",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      },{
+        "featureType": "poi.medical",
+        "elementType": "geometry",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      },{
+        "featureType": "transit.station",
+        "elementType": "labels",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      },{
+        "featureType": "landscape",
+        "elementType": "labels",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      }
+    ],
     mapOptions = {
       center: pos,
       disableDefaultUI: true,
@@ -226,13 +302,31 @@ function buildMap(lat, lon) {
       keyboardShortcuts: false,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       scrollwheel: false,
+      styles: mapStyles,
       zoom: getMapZoom()
     },
     mapDiv = document.getElementById("map-container");
   bridgesMap = new google.maps.Map(mapDiv, mapOptions);
   bridgesSelfMarker = new google.maps.Marker({
     position: pos,
+    icon: {
+      origin: new google.maps.Point(168, 0),
+      size: new google.maps.Size(14, 14),
+      url: "/img/glyphicons-halflings.png"
+    },
+    clickable: false,
     map: bridgesMap
+  });
+  bridgesRangeCircle = new google.maps.Circle({
+    strokeColor: "#ffffff",
+    strokeOpacity: 0.72,
+    strokeWeight: 1,
+    fillColor: "#ffffff",
+    fillOpacity: 0.24,
+    map: bridgesMap,
+    clickable: false,
+    center: pos,
+    radius: bridgesCurrentRange
   });
   google.maps.event.addListener(bridgesMap, 'click', mapCloseInfo);
 }
@@ -246,3 +340,15 @@ function initialize() {
 initialize();
 
 })(jQuery);
+
+// From: http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+String.prototype.hashCode = function() {
+  var hash = 0, chr;
+  if (this.length == 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr = this.charCodeAt(i);
+    hash = ((hash<<5)-hash)+chr;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}

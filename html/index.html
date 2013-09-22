@@ -2,13 +2,13 @@
 <html>
   <head>
     <title>U.S. Bridges by @arithmetric</title>
-    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
     <link href="css/app.css" rel="stylesheet" media="screen">
   </head>
   <body>
-    <div class="navbar navbar-fixed-top">
+    <header class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <a href="#" class="brand" id="action-about">U.S. Bridges</a>
         <ul class="nav">
@@ -23,7 +23,7 @@
           <li><a href="#" id="action-table"><i class="icon-list"></i> <span class="hidden-phone">Table</span></a></li>
         </ul>
       </div>
-    </div>
+    </header>
 
     <div id="map-container">
     </div>
@@ -33,7 +33,7 @@
 
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=true"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=true&libraries=geometry"></script>
     <script src="js/app.js"></script>
   </body>
 </html>
