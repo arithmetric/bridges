@@ -75,10 +75,10 @@ function updateResults() {
           $("#table-container").append("<p>Using location " + bridgesCurrentLongitude + ", " + bridgesCurrentLatitude + " in range " + bridgesCurrentRange + "</p>");
         }
         if (data.results.length) {
-          $("#table-container").append('<table class="table table-striped"><thead><th>Road</th><th>Crossing</th><th></th></thead><tbody></tbody></table>');
+          $("#table-container").append('<table class="table table-striped"><thead><th>Road</th><th>Crossing</th><th>Year Built</th></thead><tbody></tbody></table>');
           num = data.results.length;
           for (i = 0; i < num; i++) {
-            $("#table-container tbody").append("<tr><td>" + data.results[i].road + "</td><td>" + data.results[i].crossing + "</td><td></td></tr>");
+            $("#table-container tbody").append("<tr><td>" + data.results[i].road + "</td><td>" + data.results[i].crossing + "</td><td>" + data.results[i].yearBuilt + "</td></tr>");
             mapAddMarker(data.results[i]);
           }
         }
