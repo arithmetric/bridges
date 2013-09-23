@@ -11,7 +11,7 @@ function loadData() {
     .on("data", function(data) {
       handleData(data);
     }).on("end", function() {
-      console.log("end");
+      console.log("Imported data file to db records");
       process.exit();
     });
 }
@@ -75,6 +75,11 @@ MongoClient.connect(config.mongodbUrl, function(err, db) {
   if (err) throw err;
 
   mongoCollection = db.collection(config.mongodbCollection);
-  console.log('Initialized db');
-  loadData();
+  console.log('Initialized db connection');
+
+  mongoCollection.ensureIndex({"point": "2dsphere"}, {}, function () {
+    console.log('Verified db indexes');
+  
+    loadData();
+  });
 });
