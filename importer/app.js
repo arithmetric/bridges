@@ -106,6 +106,12 @@ function handleData(data) {
     record.crossing = cleanDataString(item[10]);
     record.road = cleanDataString(item[12]);
     record.location = cleanDataString(item[13]);
+    record.yearBuilt = cleanDataString(item[26]);
+    record.adt = cleanDataString(item[29]);
+    record.adtYear = cleanDataString(item[30]);
+    record.length = cleanDataString(item[55]);
+    record.yearRebuilt = cleanDataString(item[105]);
+    record.sufficiency = cleanDataString(item[132]);
 
     writeRecord(record);
   }
