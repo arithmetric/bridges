@@ -39,7 +39,8 @@ server.get('/bridges', function (req, res, next) {
     projection = {
       "crossing": true,
       "road": true,
-      "point": true
+      "point": true,
+      "yearBuilt": true
     };
     mongoCollection.find(criteria, projection).toArray(function(err, results) {
       console.log("criteria:", criteria.point["$near"]["$geometry"], "err: ", err, "results:", results);
