@@ -1,12 +1,13 @@
 
 var MongoClient = require('mongodb').MongoClient
+  , config = require('./config')
   , parser = require('./CSV')
   , mongoCollection
   , csvParser
   , csvData = '';
 
 function loadData() {
-  parser.parseCSVFile('./test.csv')
+  parser.parseCSVFile(config.csvPath)
     .on("data", function(data) {
       handleData(data);
     }).on("end", function() {
@@ -70,10 +71,10 @@ function cleanDataString(str) {
   return String(str).replace(/(^' *)|( *'$)/g, "").replace(/  /g, " ");
 }
 
-MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+MongoClient.connect(config.mongodbUrl, function(err, db) {
   if (err) throw err;
 
-  mongoCollection = db.collection('bridges');
+  mongoCollection = db.collection(config.mongodbCollection);
   console.log('Initialized db');
   loadData();
 });
