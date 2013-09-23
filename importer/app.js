@@ -15,6 +15,7 @@ function loadData() {
   fs.stat(config.csvPath, function (err, stats) {
     if (err) {
       throw(err);
+      process.exit(1);
     }
     else if (stats.isDirectory()) {
       fs.readdir(config.csvPath, function (err, files) {
@@ -36,16 +37,21 @@ function loadData() {
             }
             else {
               console.log("Finished importing all CSV files");
+              process.exit(0);
             }
           });
         }
       });
     }
     else if (stats.isFile()) {
-      loadCsvFile(config.csvPath);
+      loadCsvFile(config.csvPath, function () {
+        console.log("Finished importing CSV file");
+        process.exit(0);
+      });
     }
     else {
       console.log("The CSV path " + config.csvPath + " is not a file or directory");
+      process.exit(1);
     }
   });
 }
