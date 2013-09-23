@@ -25,8 +25,8 @@ function loadData() {
           csvFiles = [];
           num = files.length;
           for (i = 0; i < num; i++) {
-            if (files[i].substr(-4).toLowerCase() == '.csv') {
-              csvFiles.push(files[i]);
+            if (files[i].substr(-4).toLowerCase() == ".csv") {
+              csvFiles.push(config.csvPath + "/" + files[i]);
             }
           }
           async.each(csvFiles, loadCsvFile, function (err) {
