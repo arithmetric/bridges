@@ -34,7 +34,7 @@ function mapCloseInfo() {
 function mapShowInfo(e) {
   mapCloseInfo();
   bridgesInfoWindow = new google.maps.InfoWindow({
-    content: "<label>Road:</label> <strong>" + this.bridgeData.road + "</strong><br/><label>Crossing:</label> <strong>" + this.bridgeData.crossing + "</strong>",
+    content: "<label>Road:</label> <strong>" + this.bridgeData.road + "</strong><br/><label>Crossing:</label> <strong>" + this.bridgeData.crossing + "</strong><br/><label>Year Built:</label> <strong>" + this.bridgeData.yearBuilt + "</strong>",
     disableAutoPan: true
   });
   bridgesInfoWindow.open(bridgesMap, this);
@@ -54,7 +54,7 @@ function mapAddMarker(item) {
       position: new google.maps.LatLng(item.point.coordinates[1], item.point.coordinates[0]),
       animation: google.maps.Animation.DROP,
       map: bridgesMap,
-      title: item.road + ' / ' + item.crossing
+      title: item.road + ' / ' + item.crossing + " (" + item.yearBuilt + ")"
     });
     marker.bridgeData = item;
     google.maps.event.addListener(marker, 'click', mapShowInfo);
