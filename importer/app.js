@@ -1,5 +1,7 @@
 
 var MongoClient = require('mongodb').MongoClient
+  , fs = require('fs')
+  , async = require('async')
   , config = require('./config')
   , parser = require('./CSV')
   , mongoCollection
@@ -7,12 +9,55 @@ var MongoClient = require('mongodb').MongoClient
   , csvData = '';
 
 function loadData() {
-  parser.parseCSVFile(config.csvPath)
+  var i
+    , num
+    , csvFiles;
+  fs.stat(config.csvPath, function (err, stats) {
+    if (err) {
+      throw(err);
+    }
+    else if (stats.isDirectory()) {
+      fs.readdir(config.csvPath, function (err, files) {
+        if (err) {
+          throw(err);
+        }
+        else if (files && files.length) {
+          csvFiles = [];
+          num = files.length;
+          for (i = 0; i < num; i++) {
+            if (files[i].substr(-4).toLowerCase() == '.csv') {
+              csvFiles.push(files[i]);
+            }
+          }
+          async.each(csvFiles, loadCsvFile, function (err) {
+            if (err) {
+              console.log("Encountered error while importing CSVs: " + err);
+              process.exit(1);
+            }
+            else {
+              console.log("Finished importing all CSV files");
+            }
+          });
+        }
+      });
+    }
+    else if (stats.isFile()) {
+      loadCsvFile(config.csvPath);
+    }
+    else {
+      console.log("The CSV path " + config.csvPath + " is not a file or directory");
+    }
+  });
+}
+
+function loadCsvFile(fn, callback) {
+  console.log("Parsing CSV file " + fn);
+  parser.parseCSVFile(fn)
     .on("data", function(data) {
       handleData(data);
     }).on("end", function() {
       console.log("Imported data file to db records");
-      process.exit();
+      callback();
     });
 }
 
