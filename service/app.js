@@ -1,6 +1,7 @@
 
-var restify = require('restify');
-var MongoClient = require('mongodb').MongoClient
+var restify = require('restify')
+  , MongoClient = require('mongodb').MongoClient
+  , config = require('./config')
   , mongoCollection
   , server;
 
@@ -12,13 +13,12 @@ server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
 //server.use(restify.bodyParser());
 
-MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+MongoClient.connect(config.mongodbUrl, function(err, db) {
   if (err) throw err;
 
-  mongoCollection = db.collection('bridges');
+  mongoCollection = db.collection(config.mongodbCollection);
   console.log('Initialized db');
 });
-
 
 server.get('/bridges', function (req, res, next) {
   res.setHeader('Content-Type', 'application/json');
@@ -66,6 +66,6 @@ server.get('/bridges/:id', function (req, res, next) {
 });
 */
 
-server.listen(8841, function () {
-  console.log('%s listening at %s', server.name, server.url);
+server.listen(config.servicePort, function () {
+  console.log('%s listening at %s:%s', server.name, server.url, config.servicePort);
 });
