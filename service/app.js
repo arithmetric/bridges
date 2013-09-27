@@ -67,5 +67,5 @@ server.get('/bridges/:id', function (req, res, next) {
 */
 
 server.listen(config.servicePort, function () {
-  console.log('%s listening at %s:%s', server.name, server.url, config.servicePort);
+  console.log('%s listening at %s', server.name, server.url);
 });
