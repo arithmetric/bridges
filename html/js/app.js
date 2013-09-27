@@ -63,7 +63,7 @@ function mapAddMarker(item) {
 }
 
 function updateResults() {
-  var serviceUrl = 'http://' + window.location.hostname + ':8841/bridges?lon=' + bridgesCurrentLongitude + '&lat=' + bridgesCurrentLatitude + '&range=' + bridgesCurrentRange;
+  var serviceUrl = '//' + window.location.hostname + ':' + bridgesConfig.port + '/bridges?lon=' + bridgesCurrentLongitude + '&lat=' + bridgesCurrentLatitude + '&range=' + bridgesCurrentRange;
   $.ajax({
     dataType: "json",
     url: serviceUrl,
