@@ -337,7 +337,7 @@ function initialize() {
   $('#action-quarter').parent().addClass('active');
 }
 
-initialize();
+$(document).ready(initialize);
 
 })(jQuery);
 
