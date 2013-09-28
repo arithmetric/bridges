@@ -43,6 +43,9 @@
     </div>
 
     <div id="table-container" ng-show="display == 'table'">
+      <div id="table-info" ng-show="currentLocation.lon && currentLocation.lat">
+        Finding bridges within <em>{{range}} meters</em> of <em>{{currentLocation.lon}}&deg;</em> / <em>{{currentLocation.lat}}&deg;</em>:
+      </div>
       <div id="table-results-not-found" ng-show="!bridges.length">
         No bridges found.
       </div>
