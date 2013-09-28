@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" ng-app="BridgesMap">
   <head>
     <title>U.S. Bridges by @arithmetric</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,33 +7,59 @@
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
     <link href="css/app.css" rel="stylesheet" media="screen">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
+    <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=true"></script>
     <script src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=true&libraries=geometry"></script>
     <script src="js/config.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/controllers.js"></script>
   </head>
-  <body>
+  <body ng-controller="BridgesMapCtrl">
     <header class="navbar navbar-fixed-top">
       <div class="navbar-inner">
-        <a href="#" class="brand" id="action-about">U.S. Bridges</a>
+        <a href="#" class="brand" ng-click="showAbout()">U.S. Bridges</a>
         <ul class="nav">
-          <li><a href="#" class="action-range hidden-phone" id="action-quarter">1/4 mile</a></li>
-          <li><a href="#" class="action-range hidden-phone" id="action-one">1 mile</a></li>
-          <li><a href="#" class="action-range hidden-phone" id="action-three">3 miles</a></li>
-          <li><a href="#" class="action-range visible-phone" id="action-zoom-in"><i class="icon-zoom-in"></i></a></li>
-          <li><a href="#" class="action-range visible-phone" id="action-zoom-out"><i class="icon-zoom-out"></i></a></li>
-          <li><a href="#" class="action-range" id="action-track"><i class="icon-repeat"></i> <span class="hidden-phone">Follow</span></a></li>
+          <li><a href="#" class="hidden-phone" ng-click="range=400">1/4 mile</a></li>
+          <li><a href="#" class="hidden-phone" ng-click="range=1600">1 mile</a></li>
+          <li><a href="#" class="hidden-phone" ng-click="range=4800">3 miles</a></li>
+          <li><a href="#" class="visible-phone" ng-click="zoomIn()"><i class="icon-zoom-in"></i></a></li>
+          <li><a href="#" class="visible-phone" ng-click="zoomOut()"><i class="icon-zoom-out"></i></a></li>
           <li class="divider-vertical"></li>
-          <li class="active"><a href="#" id="action-map"><i class="icon-globe"></i> <span class="hidden-phone">Map</span></a></li>
-          <li><a href="#" id="action-table"><i class="icon-list"></i> <span class="hidden-phone">Table</span></a></li>
+          <li class="active"><a href="#" ng-click="display='map'"><i class="icon-globe"></i> <span class="hidden-phone">Map</span></a></li>
+          <li><a href="#" ng-click="display='table'"><i class="icon-list"></i> <span class="hidden-phone">Table</span></a></li>
         </ul>
+      </div>
+      <div class="alert {{message.code}}" ng-repeat="(key, message) in messages" ng-cloak>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Warning:</strong> {{message.message}}
       </div>
     </header>
 
-    <div id="map-container">
+    <div id="map-container" ng-show="display == 'map'">
+    </div>
+    <div id="map-info-window" ng-show="display == 'map' && infoWindowBridge" ng-cloak>
+      <label>Road:</label> <strong>{{infoWindowBridge.road}}</strong><br/>
+      <label>Crossing:</label> <strong>{{infoWindowBridge.crossing}}</strong><br/>
+      <label>Year Built:</label> <strong>{{infoWindowBridge.yearBuilt}}</strong>
     </div>
 
-    <div id="table-container">
+    <div id="table-container" ng-show="display == 'table'">
+      <div id="table-results-not-found" ng-show="!bridges.length">
+        No bridges found.
+      </div>
+      <table class="table table-striped" ng-show="bridges.length" ng-cloak>
+        <thead>
+          <th>Road</th>
+          <th>Crossing</th>
+          <th>Year Built</th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="bridge in bridges">
+            <td>{{bridge.road}}</td>
+            <td>{{bridge.crossing}}</td>
+            <td>{{bridge.yearBuilt}}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </body>
 </html>
