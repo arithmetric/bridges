@@ -7,7 +7,7 @@ var restify = require('restify')
 
 server = restify.createServer({
   name: 'bridges-service',
-  version: '0.0.1'
+  version: '0.1.0'
 });
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
@@ -20,38 +20,54 @@ MongoClient.connect(config.mongodbUrl, function(err, db) {
   console.log('Initialized db');
 });
 
+server.opts('/.*/', function (req, res, next) {
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.send({"status": "ok"});
+  return next();
+});
+
 server.get('/bridges', function (req, res, next) {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   if (req.params.hasOwnProperty('lon') && req.params.hasOwnProperty('lat') && req.params.hasOwnProperty('range')) {
-    var criteria = {
-      "point": {
-        "$near": {
-          "$geometry": {
-            "type": "Point",
-            "coordinates": [parseFloat(req.params.lon), parseFloat(req.params.lat)]
-          },
-          "$maxDistance": parseInt(req.params.range)
+    var lon = parseFloat(req.params.lon),
+      lat = parseFloat(req.params.lat),
+      range = parseInt(req.params.range),
+      criteria = {
+        "point": {
+          "$near": {
+            "$geometry": {
+              "type": "Point",
+              "coordinates": [lon, lat]
+            },
+            "$maxDistance": parseInt(req.params.range)
+          }
         }
-      }
-    },
-    projection = {
-      "crossing": true,
-      "road": true,
-      "point": true,
-      "yearBuilt": true
-    };
-    mongoCollection.find(criteria, projection).toArray(function(err, results) {
-      console.log("criteria:", criteria.point["$near"]["$geometry"], "err: ", err, "results:", results);
-      if (err || !results) {
-        res.send({"status": "error", "message": "find failed"});
-      }
-      else {
-        res.send({"status": "ok", "results": results});
-      }
+      },
+      projection = {
+        "crossing": true,
+        "road": true,
+        "point": true,
+        "yearBuilt": true
+      };
+    if (range > 0 && range < 10000 && lon > -180 && lon < 180 && lat > -90 && lat < 90) {
+      mongoCollection.find(criteria, projection).toArray(function(err, results) {
+        console.log("criteria:", criteria.point["$near"]["$geometry"], "err: ", err, "results:", results);
+        if (err || !results) {
+          res.send({"status": "error", "message": "query failed"});
+        }
+        else {
+          res.send({"status": "ok", "results": results});
+        }
+        return next();
+      });
+    }
+    else {
+      res.send({"status": "error", "message": "invalid parameters"});
       return next();
-    });
+    }
   }
   else {
     res.send({"status": "error", "message": "invalid request"});
