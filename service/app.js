@@ -7,7 +7,7 @@ var restify = require('restify')
 
 server = restify.createServer({
   name: 'bridges-service',
-  version: '0.1.0'
+  version: '0.1.1'
 });
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
@@ -24,6 +24,7 @@ server.opts('/.*/', function (req, res, next) {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.send({"status": "ok"});
+  console.log('OPTIONS');
   return next();
 });
 
@@ -54,23 +55,26 @@ server.get('/bridges', function (req, res, next) {
       };
     if (range > 0 && range < 10000 && lon > -180 && lon < 180 && lat > -90 && lat < 90) {
       mongoCollection.find(criteria, projection).toArray(function(err, results) {
-        console.log("criteria:", criteria.point["$near"]["$geometry"], "err: ", err, "results:", results);
         if (err || !results) {
           res.send({"status": "error", "message": "query failed"});
+          console.log('RANGE QUERY [' + lon + ',' + lat + ',' + range + '] failure: ' + err);
         }
         else {
           res.send({"status": "ok", "results": results});
+          console.log('RANGE QUERY [' + lon + ',' + lat + ',' + range + '] success');
         }
         return next();
       });
     }
     else {
       res.send({"status": "error", "message": "invalid parameters"});
+      console.log('RANGE QUERY [' + lon + ',' + lat + ',' + range + '] invalid parameters');
       return next();
     }
   }
   else {
     res.send({"status": "error", "message": "invalid request"});
+    console.log('RANGE QUERY invalid request');
     return next();
   }
 });
