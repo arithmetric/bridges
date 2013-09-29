@@ -25,6 +25,7 @@ function BridgesMapCtrl($scope, $http) {
   $scope.positionTimeout = 1000;
   $scope.range = 800;
   $scope.rangeCircle = 0;
+  $scope.rangeOption = 1;
   $scope.rangeOptions = [400, 800, 1600, 3200, 4800, 8000];
   $scope.selfMarker = 0;
   $scope.watchPositionId = 0;
@@ -124,6 +125,20 @@ function BridgesMapCtrl($scope, $http) {
       if (!bridge.hasOwnProperty("marker") || !bridge.marker) {
         bridge.marker = $scope.addMarker(bridge);
       }
+    }
+  };
+
+  $scope.zoomIn = function () {
+    if ($scope.rangeOption) {
+      $scope.rangeOption--;
+      $scope.range = $scope.rangeOptions[$scope.rangeOption];
+    }
+  };
+
+  $scope.zoomOut = function () {
+    if ($scope.rangeOption < $scope.rangeOptions.length) {
+      $scope.rangeOption++;
+      $scope.range = $scope.rangeOptions[$scope.rangeOption];
     }
   };
 
