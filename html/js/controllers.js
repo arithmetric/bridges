@@ -13,7 +13,7 @@ function BridgesMapCtrl($scope, $http) {
 
   $scope.bridges = [];
   $scope.currentLocation = {"lon": 0, "lat": 0};
-  $scope.dataUpdateSensitivity = 0.01;
+  $scope.dataUpdateSensitivity = 0.001;
   $scope.display = "table";
   $scope.infoWindow = 0;
   $scope.infoWindowBridge = 0;
@@ -29,12 +29,9 @@ function BridgesMapCtrl($scope, $http) {
   $scope.selfMarker = 0;
   $scope.watchPositionId = 0;
 
-  // From: http://stackoverflow.com/a/17114810/2213860
+  // From: http://stackoverflow.com/questions/14838184/error-digest-already-in-progress
   $scope.safeApply = function () {
-    if (this.$$phase || this.$root.$$phase) {
-      return;
-    }
-    this.$apply();
+    this.$$phase || this.$root.$$phase || this.$apply();
   }
 
   $scope.showMessage = function (msg, code) {
@@ -64,9 +61,7 @@ function BridgesMapCtrl($scope, $http) {
   };
 
   $scope.updateData = function () {
-    $scope.showMessage("location difference: " + Math.sqrt(Math.pow($scope.currentLocation.lon - $scope.lastDataLocation.lon, 2) + Math.pow($scope.currentLocation.lat - $scope.lastDataLocation.lat, 2)), "info");
     if ($scope.range <= $scope.lastDataRange && Math.sqrt(Math.pow($scope.currentLocation.lon - $scope.lastDataLocation.lon, 2) + Math.pow($scope.currentLocation.lat - $scope.lastDataLocation.lat, 2)) < $scope.dataUpdateSensitivity) {
-//      $scope.showMessage("no update needed", "info");
       return;
     }
     var serviceUrl = "//" + window.location.hostname + ":" + bridgesConfig.port + "/bridges?lon=" + $scope.currentLocation.lon + "&lat=" + $scope.currentLocation.lat + "&range=" + $scope.range;
