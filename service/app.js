@@ -53,7 +53,7 @@ server.get('/bridges', function (req, res, next) {
         "point": true,
         "yearBuilt": true
       };
-    if (range > 0 && range < 10000 && lon > -180 && lon < 180 && lat > -90 && lat < 90) {
+    if (range > 0 && range < 10000 && lon && lon > -180 && lon < 180 && lat && lat > -90 && lat < 90) {
       mongoCollection.find(criteria, projection).toArray(function(err, results) {
         if (err || !results) {
           res.send({"status": "error", "message": "query failed"});
