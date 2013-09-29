@@ -13,9 +13,12 @@ function BridgesMapCtrl($scope, $http) {
 
   $scope.bridges = [];
   $scope.currentLocation = {"lon": 0, "lat": 0};
+  $scope.dataUpdateSensitivity = 0.01;
   $scope.display = "table";
   $scope.infoWindow = 0;
   $scope.infoWindowBridge = 0;
+  $scope.lastDataLocation = {"lon": 0, "lat": 0},
+  $scope.lastDataRange = 0;
   $scope.map = 0;
   $scope.mapMarkers = [];
   $scope.messages = {};
@@ -26,18 +29,26 @@ function BridgesMapCtrl($scope, $http) {
   $scope.selfMarker = 0;
   $scope.watchPositionId = 0;
 
+  // From: http://stackoverflow.com/a/17114810/2213860
+  $scope.safeApply = function () {
+    if (this.$$phase || this.$root.$$phase) {
+      return;
+    }
+    this.$apply();
+  }
+
   $scope.showMessage = function (msg, code) {
     var msgHash = String(msg).hashCode();
     if (!$scope.messages.hasOwnProperty(msgHash)) {
       $scope.messages["msg" + msgHash] = {"message": msg, "code": code};
-      $scope.$apply();
+      $scope.safeApply();
     }
   };
 
   $scope.getLocation = function () {
     function locationSuccess(point) {
       $scope.currentLocation = {"lon": point.coords.longitude, "lat": point.coords.latitude};
-      $scope.$apply();
+      $scope.safeApply();
     }
 
     function locationError(err) {
@@ -53,10 +64,17 @@ function BridgesMapCtrl($scope, $http) {
   };
 
   $scope.updateData = function () {
+    $scope.showMessage("location difference: " + Math.sqrt(Math.pow($scope.currentLocation.lon - $scope.lastDataLocation.lon, 2) + Math.pow($scope.currentLocation.lat - $scope.lastDataLocation.lat, 2)), "info");
+    if ($scope.range <= $scope.lastDataRange && Math.sqrt(Math.pow($scope.currentLocation.lon - $scope.lastDataLocation.lon, 2) + Math.pow($scope.currentLocation.lat - $scope.lastDataLocation.lat, 2)) < $scope.dataUpdateSensitivity) {
+//      $scope.showMessage("no update needed", "info");
+      return;
+    }
     var serviceUrl = "//" + window.location.hostname + ":" + bridgesConfig.port + "/bridges?lon=" + $scope.currentLocation.lon + "&lat=" + $scope.currentLocation.lat + "&range=" + $scope.range;
     $http.get(serviceUrl).success(function(data) {
       if (data.hasOwnProperty("status") && data.hasOwnProperty("results") && data.status == "ok") {
         $scope.bridges = data.results;
+        $scope.lastDataLocation = $scope.currentLocation;
+        $scope.lastDataRange = $scope.range;
       }
     });
   };
@@ -71,7 +89,7 @@ function BridgesMapCtrl($scope, $http) {
   $scope.showInfoWindow = function () {
     $scope.closeInfoWindow();
     $scope.infoWindowBridge = this.bridge;
-    $scope.$apply();
+    $scope.safeApply();
     $scope.infoWindow = new google.maps.InfoWindow({
       content: jQuery("#map-info-window").html(),
       disableAutoPan: true
