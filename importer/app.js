@@ -30,6 +30,7 @@ function loadData() {
               csvFiles.push(config.csvPath + "/" + files[i]);
             }
           }
+          console.log("Importing bridge data CSV files: " + csvFiles.join(", "));
           async.each(csvFiles, loadCsvFile, function (err) {
             if (err) {
               console.log("Encountered error while importing CSVs: " + err);
