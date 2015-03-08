@@ -2,13 +2,19 @@
 .navbar {
   top: 0;
   z-index: 100;
-  position: fixed !important;
+  position: fixed;
 }
 
-.navbar-inner {
+header.navbar-fixed-top .navbar-inner {
   max-height: 40px;
   white-space: nowrap;
-  padding: 0 10px;
+  padding: 0 20px;
+}
+
+header.navbar .brand {
+  padding-right: 0;
+  font-weight: 400;
+  font-size: 16px;
 }
 
 @media (max-width: 480px) {
@@ -26,10 +32,31 @@
   top: 0;
 }
 
-#table-container {
+.hideMap {
+  margin-left: -100%;
+}
+
+#table-container,
+#about-container {
   margin-top: 40px;
+  padding: 10px 0;
 }
 
 img {
   max-width: inherit;
+}
+
+.bridge-info-part {
+  float: left;
+  margin-right: 24px;
+}
+
+.bridge-info-part .info {
+  font-weight: bold;
+}
+
+.bridge-info-part label {
+  text-transform: uppercase;
+  color: #888;
+  font-size: .8em;
 }

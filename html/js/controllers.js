@@ -10,7 +10,6 @@ BridgesMap.config(["$httpProvider", function($httpProvider) {
  * Controller for the Bridges map application.
  */
 function BridgesMapCtrl($scope, $http) {
-
   $scope.bridges = [];
   $scope.currentLocation = {"lon": 0, "lat": 0};
   $scope.dataUpdateSensitivity = 0.001;
@@ -23,10 +22,12 @@ function BridgesMapCtrl($scope, $http) {
   $scope.mapMarkers = [];
   $scope.messages = {};
   $scope.positionTimeout = 1000;
-  $scope.range = 800;
   $scope.rangeCircle = 0;
   $scope.rangeOption = 1;
-  $scope.rangeOptions = [400, 800, 1600, 3200, 4800, 8000];
+  $scope.rangeOptions = [400, 800, 1600, 3200, 4800];
+  $scope.rangeOptionsText = ["1/4 mile", "1/2 mile", "1 mile", "2 miles", "3 miles"];
+  $scope.range = $scope.rangeOptions[$scope.rangeOption];
+  $scope.rangeText = $scope.rangeOptionsText[$scope.rangeOption];
   $scope.selfMarker = 0;
   $scope.watchPositionId = 0;
 
@@ -62,6 +63,9 @@ function BridgesMapCtrl($scope, $http) {
   };
 
   $scope.updateData = function () {
+    if ($scope.currentLocation.lon == 0 || $scope.currentLocation.lat == 0 || $scope.range == 0) {
+      return;
+    }
     if ($scope.range <= $scope.lastDataRange && Math.sqrt(Math.pow($scope.currentLocation.lon - $scope.lastDataLocation.lon, 2) + Math.pow($scope.currentLocation.lat - $scope.lastDataLocation.lat, 2)) < $scope.dataUpdateSensitivity) {
       return;
     }
@@ -132,13 +136,24 @@ function BridgesMapCtrl($scope, $http) {
     if ($scope.rangeOption) {
       $scope.rangeOption--;
       $scope.range = $scope.rangeOptions[$scope.rangeOption];
+      $scope.rangeText = $scope.rangeOptionsText[$scope.rangeOption];
     }
   };
 
   $scope.zoomOut = function () {
-    if ($scope.rangeOption < $scope.rangeOptions.length) {
+    if ($scope.rangeOption < ($scope.rangeOptions.length - 1)) {
       $scope.rangeOption++;
       $scope.range = $scope.rangeOptions[$scope.rangeOption];
+      $scope.rangeText = $scope.rangeOptionsText[$scope.rangeOption];
+    }
+  };
+
+  $scope.setRange = function (range) {
+    var option = $scope.rangeOptions.indexOf(range);
+    if (option >= 0 && option < $scope.rangeOptions.length) {
+      $scope.rangeOption = option;
+      $scope.range = $scope.rangeOptions[$scope.rangeOption];
+      $scope.rangeText = $scope.rangeOptionsText[$scope.rangeOption];
     }
   };
 
@@ -268,6 +283,27 @@ function BridgesMapCtrl($scope, $http) {
   $scope.$watch("range", function () {
     $scope.updateMap();
     $scope.updateData();
+  });
+
+  $scope.$watch("display", function () {
+    if ($scope.display === "map") {
+      jQuery("#map-container").removeClass("hideMap");
+      jQuery("#displayOptionMap").addClass("active");
+      jQuery("#displayOptionList").removeClass("active");
+      jQuery("#displayOptionAbout").removeClass("active");
+    }
+    else if ($scope.display === "table") {
+      jQuery("#map-container").addClass("hideMap");
+      jQuery("#displayOptionList").addClass("active");
+      jQuery("#displayOptionMap").removeClass("active");
+      jQuery("#displayOptionAbout").removeClass("active");
+    }
+    else if ($scope.display === "about") {
+      jQuery("#map-container").addClass("hideMap");
+      jQuery("#displayOptionAbout").addClass("active");
+      jQuery("#displayOptionList").removeClass("active");
+      jQuery("#displayOptionMap").removeClass("active");
+    }
   });
 
   jQuery(window).resize(function () {
