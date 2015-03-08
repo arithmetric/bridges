@@ -59,16 +59,25 @@ function loadData() {
 
 function loadCsvFile(fn, callback) {
   console.log("Parsing CSV file " + fn);
+  var allItemsQueued = false,
+    queue = async.queue(handleData, 13);
+
+  queue.drain = function () {
+    if (allItemsQueued) {
+      callback();
+    }
+  };
+
   parser.parseCSVFile(fn)
     .on("data", function(data) {
-      handleData(data);
+      queue.push([data]);
     }).on("end", function() {
       console.log("Imported data file to db records");
-      callback();
+      allItemsQueued = true;
     });
 }
 
-function handleData(data) {
+function handleData(data, callback) {
   var len = data.length
     , i
     , item
@@ -81,22 +90,21 @@ function handleData(data) {
     , bridgeLocation
     , record;
 
-  for (i = 0; i < len; i++) {
-    item = data[i];
+  async.each(data, function (item, cb) {
     record = {};
 
     // Parse and normalize longitude and latitude
-    itemLonInt = parseInt(item[20], 10);
-    itemLatInt = parseInt(item[19], 10);
-    itemLon = -1 * parseFloat(Number(String(itemLonInt).substring(0, 2)) + Number((String(itemLonInt).substring(2, 4) / 60)) + Number((String(itemLonInt).substring(4, 8) / 366000)));
-    itemLat = parseFloat(Number(String(itemLatInt).substring(0, 2)) + Number((String(itemLatInt).substring(2, 4) / 60)) + Number((String(itemLatInt).substring(4, 8) / 366000)));
-    if (isNaN(itemLon)) {
+    itemLonInt = String(item[20]);
+    itemLatInt = String(item[19]);
+    itemLon = -1 * parseFloat(Number(itemLonInt.substr(0, 3)) + Number((itemLonInt.substr(3, 2) / 60)) + Number((itemLonInt.substr(5, 4) / 366000)));
+    itemLat = parseFloat(Number(itemLatInt.substr(0, 2)) + Number((itemLatInt.substr(2, 2) / 60)) + Number((itemLatInt.substr(4, 4) / 366000)));
+    if (isNaN(itemLon) || itemLon < -180 || itemLon > 180) {
       console.log("Invalid longitude value for bridge " + item[1]);
-      continue;
+      return cb();
     }
-    if (isNaN(itemLat)) {
+    if (isNaN(itemLat) || itemLat < -90 || itemLat > 90) {
       console.log("Invalid latitude value for bridge " + item[1]);
-      continue;
+      return cb();
     }
     record.point = {
       "type": "Point",
@@ -114,14 +122,17 @@ function handleData(data) {
     record.yearRebuilt = cleanDataString(item[105]);
     record.sufficiency = cleanDataString(item[132]);
 
-    writeRecord(record);
-  }
-  console.log('Finished writing ' + len + ' data records');
+    writeRecord(record, cb);
+  }, function (err, results) {
+    console.log('Finished writing ' + len + ' data records');
+    callback();
+  });
 }
 
-function writeRecord(item) {
+function writeRecord(item, cb) {
   mongoCollection.insert(item, function(err, docs) {
     if (err) { throw(err); }
+    return cb();
   });
 }
 
@@ -137,7 +148,7 @@ MongoClient.connect(config.mongodbUrl, function(err, db) {
 
   mongoCollection.ensureIndex({"point": "2dsphere"}, {}, function () {
     console.log('Verified db indexes');
-  
+
     loadData();
   });
 });
