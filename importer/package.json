@@ -7,6 +7,9 @@
     "email": "arithmetric@gmail.com"
   },
   "main": "app",
+  "scripts": {
+    "start": "npm install; node app"
+  },
   "dependencies": {
     "mongodb": "*",
     "async": "*"
