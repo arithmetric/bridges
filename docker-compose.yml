@@ -1,0 +1,25 @@
+service:
+  build: service
+  volumes:
+    - ./service/src:/opt/app
+  environment:
+    DNSDOCK_NAME: service
+    DNSDOCK_IMAGE: bridges
+  links:
+    - mongo:mongo
+mongo:
+  build: mongo
+  volumes:
+    - /data/bridges/mongo:/data/db
+  environment:
+    DNSDOCK_NAME: mongo
+    DNSDOCK_IMAGE: bridges
+    MONGO_OPTIONS: --journal --noprealloc --smallfiles
+app:
+  build: app
+  volumes:
+    - ./app/src:/usr/share/nginx/html
+    - ./app/env/local/etc/nginx:/etc/nginx
+  environment:
+    DNSDOCK_NAME: www
+    DNSDOCK_IMAGE: bridges
