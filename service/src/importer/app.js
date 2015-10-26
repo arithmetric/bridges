@@ -2,7 +2,7 @@
 var MongoClient = require('mongodb').MongoClient
   , fs = require('fs')
   , async = require('async')
-  , config = require('./config')
+  , config = require('../config')
   , parser = require('./CSV')
   , mongoCollection
   , csvParser
