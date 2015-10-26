@@ -2,6 +2,7 @@
 var restify = require('restify')
   , MongoClient = require('mongodb').MongoClient
   , config = require('./config')
+  , mongoUrl
   , mongoCollection
   , server;
 
@@ -13,7 +14,10 @@ server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
 //server.use(restify.bodyParser());
 
-MongoClient.connect(config.mongodbUrl, function(err, db) {
+mongoUrl = "mongodb://" + config.mongodbHost + ":" + config.mongodbPort + "/" + config.mongodbDatabase;
+console.log('connecting to mongo: ' + mongoUrl);
+
+MongoClient.connect(mongoUrl, function(err, db) {
   if (err) throw err;
 
   mongoCollection = db.collection(config.mongodbCollection);

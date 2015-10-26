@@ -69,7 +69,7 @@ function BridgesMapCtrl($scope, $http) {
     if ($scope.range <= $scope.lastDataRange && Math.sqrt(Math.pow($scope.currentLocation.lon - $scope.lastDataLocation.lon, 2) + Math.pow($scope.currentLocation.lat - $scope.lastDataLocation.lat, 2)) < $scope.dataUpdateSensitivity) {
       return;
     }
-    var serviceUrl = "//" + window.location.hostname + ":" + bridgesConfig.port + "/bridges?lon=" + $scope.currentLocation.lon + "&lat=" + $scope.currentLocation.lat + "&range=" + $scope.range;
+    var serviceUrl = "//" + bridgesConfig.hostname + ":" + bridgesConfig.port + "/bridges?lon=" + $scope.currentLocation.lon + "&lat=" + $scope.currentLocation.lat + "&range=" + $scope.range;
     $http.get(serviceUrl).success(function(data) {
       if (data.hasOwnProperty("status") && data.hasOwnProperty("results") && data.status == "ok") {
         $scope.bridges = data.results;
